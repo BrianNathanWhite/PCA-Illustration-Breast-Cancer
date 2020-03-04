@@ -43,17 +43,10 @@ pca_tumor=prcomp(wdbc_F[,3:32], scale=TRUE, center=TRUE)
 ```
 
 ### Problem 7
-The scree plot is displayed below. A threshold of .9 was used and let me to select the first 7 principle components. Note that this can be confirmed visually in the sree plot.
-```{r cumulative variance plot}
-cum_var=summary(pca_tumor)$importance[3, ]
-cum_var
+The scree plot is displayed below. The elbow, or the point at which the eigenvalues seem to level off, occurs at 7. Thus, the first 7 principle components will be used.
 
-P=1:length(cum_var) #the number of principle components
-
-plot(cum_var~P, type="l", xlab="no. of principle components", ylab="total variance")
-
-abline(.90, 0, col="red") #cumulative variance threshold of .9
-which(cum_var>=.9)
+```{r}
+plot(pca_tumor$sdev^2, xlab="Component number", ylab="Component variance", type="l")
 ```
 
 ### Problem 8
