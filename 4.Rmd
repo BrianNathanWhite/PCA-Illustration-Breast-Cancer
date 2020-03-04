@@ -1,0 +1,100 @@
+---
+title: 'STA 663: Homework #4'
+author: "Brian N. White"
+date: "3/3/2020"
+output:
+  pdf_document: default
+  html_document: default
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+#import the data
+wdbc_F <- read.csv("wdbc_F.csv")
+```
+
+### Question 1
+
+As described in the paper in question, one way in which breast cancer is diagnosed is through a biopsy. A less invasive alternative to this procedure is a fine needle aspiration (FNA). FNAs enable one to examine a small sample of tumor tissue. This tissue is then examined by physicians who make a subjective classification of the sample as cancerous or not. The motivation of the experiment in question was to develop a more objective means of detecting the presence of cancerous cells in breast tumors via fine needle aspirations (FNA). 
+
+### Problem 2
+
+Each observation is an image. In particular, each image is of a stained drop of fluid viewed under microscope taken from the FNA of a breast cancer tumor. The sample size is 568.
+
+### Problem 3
+
+There are 32 variables. Of these variables, 30 are engineered from the variables radius, perimeter, area, compactness, smoothness, concavity, concave points, symmetry, fractal dimension and texture. These ten refer to features of the nuclei present in each image. In particular, the mean, max (i.e. 'worst') and standard deviation of these ten variables are calculated for each image which gives the aforementioned 30 variables. The remaining 2 variables are the observation ID, 'id', and the binary categorical variable, 'diagnosis'.
+
+### Problem 4
+
+The variable 'radius' (not present in the data set) refers to the radius of an individual nucleus in an image. As described in the paper in question, this value is calculated by taking the mean of the length of the radial line segments defined by the centroid of the snake. Each image will have a 'radius' value for each nucleus in the image. Thus, 'radius_mean', 'radius_se' and 'radius_worst' give the mean, standard deviation, and max, respectively, of an image's radius values.
+
+### Problem 5
+
+As mentioned above, the procedure used to obtain the cells from each image is called a fine needle aspiration (FNA). A FNA is performed by first extracting a drop of fluid from a breast tumor using a fine needle. This drop is then placed onto a glass slide and stained. Then the slide is examined under microscope and and photographed via specialized software.
+
+### Problem 6
+
+```{r pca}
+pca_tumor=prcomp(wdbc_F[,3:32], scale=TRUE, center=TRUE)
+```
+
+### Problem 7
+The scree plot is displayed below. A threshold of .9 was used and let me to select the first 7 principle components. Note that this can be confirmed visually in the sree plot.
+```{r cumulative variance plot}
+cum_var=summary(pca_tumor)$importance[3, ]
+cum_var
+
+P=1:length(cum_var) #the number of principle components
+
+plot(cum_var~P, type="l", xlab="no. of principle components", ylab="total variance")
+
+abline(.90, 0, col="red") #cumulative variance threshold of .9
+which(cum_var>=.9)
+```
+
+### Problem 8
+
+The new data set, created from the first 7 principle components is computed and printed below as 'Y_reduced'.
+```{r reduced data}
+r=pca_tumor$rotation
+wdbc_F.c=scale(wdbc_F[, 3:32], center=T, scale=T)
+Y_reduced=wdbc_F.c%*%r[,1:7]
+head(Y_reduced)
+
+```
+
+### Problem 9 
+
+```{r pca2 vs pca1}
+plot(Y_reduced[, 2]~Y_reduced[, 1], col="blue", xlab="PC 1", ylab="PC 2")
+```
+
+
+### Problem 10
+
+As can be seen in the plot below, the first and second principle components are fairly effective in discriminating between benign and malignent tumor cells.
+
+```{r classification}
+library("factoextra")
+
+fviz_pca_ind(pca_tumor, geom.ind = "point", pointshape = 21,
+
+pointsize = 2,
+fill.ind = wdbc_F$diagnosis,
+col.ind = "black",
+palette = "jco",
+addEllipses = TRUE,
+label = "var",
+col.var = "black",
+repel = TRUE,
+legend.title = "Diagnosis") +
+ggtitle("2D PCA-plot from 30 feature dataset") +
+theme(plot.title = element_text(hjust = 0.5))
+
+
+```
+
