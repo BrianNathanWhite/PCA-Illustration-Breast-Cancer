@@ -1,3 +1,3 @@
 # Principle-Component-Analysis-Exercise
 
-Illustration of principle component analysis on a heart disease data set.
+Principle component analysis is performed on a biological data set consisting of measurments on cancerous breast tumor samples. 
